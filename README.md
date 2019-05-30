@@ -1,5 +1,6 @@
 # 津南数字制造算法挑战赛 X-Force 代码
 
+[比赛攻略](https://tianchi.aliyun.com/notebook-ai/detail?spm=5176.12281915.0.0.11ba1842na87VQ&postId=57411)
 
 # 推理
 

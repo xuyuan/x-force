@@ -1,0 +1,31 @@
+name: xray_unet
+channels:
+  - fastai/label/test
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.5.0
+  - pillow-simd
+
+  - cudatoolkit=9.0
+  - pytorch=1.0
+  - torchvision
+
+#  - opencv
+  - cython
+  - scipy
+#  - matplotlib
+  - tqdm
+#  - pandas
+  - pyyaml
+  - scikit-image
+  - pip
+  - pip:
+#    - lazy-import
+    - pycocotools
+    - pretrainedmodels
+    - tensorboardX
+    - opencv-python-headless
+    - git+https://github.com/NVIDIA/apex.git@8ab5e4703f404294c3bed3b91fc7601f67701345
+#    - torchsummary

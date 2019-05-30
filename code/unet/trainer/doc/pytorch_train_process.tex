@@ -1,0 +1,77 @@
+\documentclass[12pt]{article}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\usetikzlibrary{shapes, arrows, decorations.markings, backgrounds}
+
+% for double arrows a la chef
+% adapt line thickness and line width, if needed
+\tikzstyle{vecNoArrow} = [thick, decoration={markings,mark=at position 1 with {\arrow[semithick]{open triangle 60}}},
+double distance=1.4pt, shorten >= 5.5pt,
+postaction = {draw,line width=1.4pt, white, shorten >= 4.5pt}]
+\tikzstyle{vecArrow} = [vecNoArrow, preaction = {decorate}]
+
+\tikzstyle{module} = [rounded corners, draw, rectangle split,rectangle split parts=2]
+
+\usepackage[graphics,tightpage,active]{preview}
+\PreviewEnvironment{tikzpicture}
+
+\begin{document}
+\pagestyle{empty}
+
+\begin{tikzpicture}[scale=.8,every node/.style={minimum size=1cm},on grid]
+
+
+\node[rounded corners, draw, text width=1.4cm] at (0.85, -4.85) {workers};
+\node[rounded corners, draw, text width=1.4cm] at (0.8, -4.9) {workers};
+\node[rounded corners, draw, text width=1.4cm] at (0.75, -4.95) {workers};
+\node[rounded corners, draw, text width=1.4cm, fill=white] (workers) at(0.7, -5) {workers};
+\node[rounded corners, draw, above of=workers, node distance=1.5cm] (dl) {DatasetLoader};
+\node[module, below of=workers, node distance=2.3cm] (ds) {Dataset \nodepart{second} \textit{train, valid}};
+\node[module, right of=ds, node distance=2.8cm] (transform) {Transform \nodepart{second} \textit{flip, crop, ...}};
+
+\draw (ds) to (transform);
+\draw[->] (workers) to (dl);
+\draw[->] (ds) to node[right, rectangle split,rectangle split parts=2, text width=3cm] {input data $x$ \nodepart{second} label $z$} (workers);
+
+% CPU
+%-----------------------
+% GPU
+\node[module, right of=dl, node distance=6cm] (model) {DNN Model \nodepart{second} weights $W$};
+\node[right of=model, node distance=3.5cm, rectangle split,rectangle split parts=2] (Y) {batch of output \nodepart{second} $Y$};
+\node[module, right of=Y, node distance=5cm] (loss) {Loss \nodepart{second} \textit{CE / L1 / ...}};
+\path (model) -- coordinate(ml) (loss);
+\node[module, below of=ml, node distance=2.3cm] (optim) {Optimizer \nodepart{second} \textit{sgd / adam / ...}};
+\node[above of=Y, node distance=1.5cm, rectangle split,rectangle split parts=2] (Z) {batch of labels \nodepart{second} $Z$};
+
+\draw[vecNoArrow] (dl) |- (Z.east);
+\draw[vecArrow] (dl) -- node[rectangle split,rectangle split parts=2] {batch of input \nodepart{second} $X$} (model);
+\draw[vecArrow] (model) -- (loss);
+\draw[vecArrow] (Z.east) to (loss.west);
+\draw[vecArrow] (loss) |- node[below] {gradient} (optim);
+\draw[vecArrow] (optim) -| node[below] {weights adjustment $\Delta W$} (model);
+
+% GPU
+%-----------------------
+% CPU
+
+\node[module, right of=loss, node distance=4cm] (logger) {Logger \nodepart{second} \textit{tensorboard, wisdom}};
+\node[module, above of=loss, node distance=1.5cm] (metric) {Metric \nodepart{second} \textit{AUC/mAP/...}};
+\node[module, below right of=logger, node distance=3cm] (lrs) {Learning rate scheduler \nodepart{second} \textit{step/cosw/plateau/...}};
+
+\draw[vecArrow] (Z.west) to (metric);
+\draw[vecArrow] (Y.east) to (metric.west);
+\draw[->] (metric) to (logger);
+\draw[->, dashed] (metric) -| (lrs);
+\draw[->] (loss) to (logger);
+\draw[->] (lrs) -- ++(0, -2) -| node[below right] {learning rate $r$} (optim);
+
+
+\begin{pgfonlayer}{background}
+\filldraw [line width=6mm,join=round,green!30]
+(model.north  -| model.west) rectangle node[black!80]{\textbf{GPU}} (optim.south  -| loss.east) ;
+\end{pgfonlayer}
+
+\end{tikzpicture}
+
+\end{document} 
